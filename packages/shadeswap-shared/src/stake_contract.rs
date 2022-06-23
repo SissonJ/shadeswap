@@ -1,13 +1,11 @@
-use fadroma::{
-    scrt::{Binary, Decimal, HumanAddr, Uint128},
-    scrt_callback::Callback,
-    scrt_link::{ContractInstantiationInfo, ContractLink},
-};
+
+use cosmwasm_math_compat::Uint128;
+use cosmwasm_std::HumanAddr;
+use fadroma::prelude::ContractInstantiationInfo;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use crate::TokenType;
 
-pub use crate::snip20_impl::msg as snip20;
 use crate::token_amount::TokenAmount;
 use crate::token_pair_amount::TokenPairAmount;
 

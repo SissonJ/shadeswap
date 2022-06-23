@@ -1,13 +1,9 @@
-use fadroma::{
-    scrt::{
-        HumanAddr, CanonicalAddr, Api, StdResult,
-        Querier, Uint128, StdError, Env, CosmosMsg,
-        WasmMsg, BankMsg, Coin, to_binary,
-        secret_toolkit::snip20
-    },
-    scrt_addr::{Canonize, Humanize}
-};
+
+use cosmwasm_math_compat::Uint128;
+use cosmwasm_std::{CanonicalAddr, HumanAddr, StdResult, Api, Env, StdError, Querier, CosmosMsg, WasmMsg, to_binary, Coin, BankMsg};
+use fadroma::prelude::{Canonize, Humanize};
 use schemars::JsonSchema;
+use secret_toolkit::snip20;
 use serde::{Deserialize, Serialize};
 const BLOCK_SIZE: usize = 256;
 
@@ -23,7 +19,7 @@ pub enum TokenType<A> {
         denom: String,
     },
 }
-impl Canonize<TokenType<CanonicalAddr>> for TokenType<HumanAddr> {
+impl Canonize for TokenType<HumanAddr> {
     fn canonize(&self, api: &impl Api) -> StdResult<TokenType<CanonicalAddr>> {
         Ok(match self {
             Self::CustomToken {
@@ -39,7 +35,7 @@ impl Canonize<TokenType<CanonicalAddr>> for TokenType<HumanAddr> {
         })
     }
 }
-impl Humanize<TokenType<HumanAddr>> for TokenType<CanonicalAddr> {
+impl Humanize for TokenType<CanonicalAddr> {
     fn humanize(&self, api: &impl Api) -> StdResult<TokenType<HumanAddr>> {
         Ok(match self {
             Self::CustomToken {
@@ -138,9 +134,11 @@ impl TokenType<HumanAddr> {
                     callback_code_hash: token_code_hash.to_string(),
                     msg: to_binary(&snip20::HandleMsg::Send {  
                         recipient,
+                        recipient_code_hash: None,
                         amount,
                         padding: None,
                         msg: None,
+                        memo: None,
                     })?,
                     send: vec![]
                 })

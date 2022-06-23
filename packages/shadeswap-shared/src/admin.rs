@@ -1,20 +1,7 @@
-use crate::fadroma::{
-    scrt::{
-        from_binary, log, secret_toolkit::snip20, to_binary, Api, BankMsg, Binary, Coin, CosmosMsg,
-        Decimal, Env, Extern, HandleResponse, HumanAddr, InitResponse, Querier, QueryRequest,
-        QueryResult, StdError, StdResult, Storage, Uint128, WasmMsg, WasmQuery,
-    },
-    scrt_storage::{load, save, ns_save, ns_load},
-    scrt_callback::Callback,
-    scrt_link::ContractLink,
-    scrt_uint256::Uint256,
-    scrt_vk::ViewingKey,
-};
+use cosmwasm_std::{HumanAddr, Storage, StdResult, StdError, HandleResponse, Querier, log, Extern, Env, Api};
+use cosmwasm_storage::{Singleton, singleton, ReadonlySingleton, singleton_read};
 
 
-use composable_snip20::msg::{
-    InitConfig as Snip20ComposableConfig, InitMsg as Snip20ComposableMsg,
-};
 
 pub static ADMIN: &[u8] =b"contract_pair_admin";
 
@@ -33,12 +20,20 @@ pub fn store_admin <S: Storage, A: Api, Q: Querier>(
     deps:  &mut Extern<S, A, Q>,
     admin: &HumanAddr
 ) -> StdResult<()> {
-    save(&mut deps.storage, ADMIN, &admin)
+    admin_w(&mut deps.storage).save(admin)
 }
 
 pub fn load_admin(storage: &impl Storage) -> StdResult<HumanAddr> {
-    let admin = load(storage, ADMIN)?.unwrap_or(HumanAddr("".to_string()));
+    let admin = admin_r(storage).load()?;
     Ok(admin)
+}
+
+pub fn admin_w<S: Storage>(storage: &mut S) -> Singleton<S, HumanAddr> {
+    singleton(storage, ADMIN)
+}
+
+pub fn admin_r<S: Storage>(storage: &S) -> ReadonlySingleton<S, HumanAddr> {
+    singleton_read(storage, ADMIN)
 }
 
 pub fn set_admin_guard<S: Storage, A: Api, Q: Querier>(

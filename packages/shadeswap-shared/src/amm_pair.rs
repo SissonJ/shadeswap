@@ -1,11 +1,9 @@
-use fadroma::{
-    scrt::{HumanAddr, StdResult, Api, CanonicalAddr},
-    scrt_addr::{Canonize, Humanize},
-    scrt_link::ContractLink,
-};
 use crate::token_pair::TokenPair;
+use cosmwasm_std::{HumanAddr, CanonicalAddr, StdResult, Api};
+use fadroma::prelude::{Humanize, Canonize};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use shade_protocol::utils::asset::Contract;
 
 /// Represents the address of an exchange and the pair that it manages
 #[derive(Serialize, Deserialize, JsonSchema, Clone, PartialEq, Debug)]
@@ -16,7 +14,7 @@ pub struct AMMPair<A: Clone> {
     pub address: A,
 }
 
-impl Canonize<AMMPair<CanonicalAddr>> for AMMPair<HumanAddr> {
+impl Canonize for AMMPair<HumanAddr> {
     fn canonize(&self, api: &impl Api) -> StdResult<AMMPair<CanonicalAddr>> {
         Ok(AMMPair {
             pair: self.pair.canonize(api)?,
@@ -25,7 +23,7 @@ impl Canonize<AMMPair<CanonicalAddr>> for AMMPair<HumanAddr> {
     }
 }
 
-impl Humanize<AMMPair<HumanAddr>> for AMMPair<CanonicalAddr> {
+impl Humanize for AMMPair<CanonicalAddr> {
     fn humanize(&self, api: &impl Api) -> StdResult<AMMPair<HumanAddr>> {
         Ok(AMMPair {
             pair: self.pair.humanize(api)?,
@@ -35,14 +33,14 @@ impl Humanize<AMMPair<HumanAddr>> for AMMPair<CanonicalAddr> {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema, PartialEq, Debug, Clone)]
-pub struct AMMSettings<A> {
+pub struct AMMSettings {
     pub lp_fee: Fee,
     pub shade_dao_fee: Fee,
-    pub shade_dao_address: ContractLink<A>
+    pub shade_dao_address: Contract
 }
 
-impl AMMSettings<HumanAddr> {
-    pub fn canonize(&self, api: &impl Api) -> StdResult<AMMSettings<CanonicalAddr>> {
+impl AMMSettings {
+    pub fn canonize(&self, api: &impl Api) -> StdResult<AMMSettings> {
         Ok(AMMSettings {
             lp_fee: self.lp_fee,
             shade_dao_fee: self.shade_dao_fee,
@@ -51,8 +49,8 @@ impl AMMSettings<HumanAddr> {
     }
 }
 
-impl AMMSettings<CanonicalAddr> {
-    pub fn humanize(self, api: &impl Api) -> StdResult<AMMSettings<HumanAddr>> {
+impl AMMSettings {
+    pub fn humanize(self, api: &impl Api) -> StdResult<AMMSettings> {
         Ok(AMMSettings {
             lp_fee: self.lp_fee,
             shade_dao_fee: self.shade_dao_fee,

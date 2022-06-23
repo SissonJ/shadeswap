@@ -41,16 +41,10 @@ cosmwasm-std = { version = "0.10", package = "secret-cosmwasm-std" }
 cosmwasm-storage = { version = "0.10", package = "secret-cosmwasm-storage" }
 # secret-toolkit = "0.2.0" # Uncomment this for extra tools
 secret-toolkit = { version = "0.2" }
-fadroma = { path = "../../packages/fadroma-next/lib", features = [
-  "scrt",
-  "scrt-addr",
-  "scrt-icc",
-  "scrt-migrate",
-  "scrt-storage",
-  "scrt-admin",
-  "scrt-vk"
-] }
-composable-snip20 = { path = "../fadroma-next/lib/composable-snip20" }
+fadroma = { branch = "v100", git = "https://github.com/hackbg/fadroma.git" }
+shade-protocol = { branch = "dev", git = "https://github.com/securesecrets/shade.git" }
+cosmwasm-math-compat = { branch = "dev", git = "https://github.com/securesecrets/shade.git" }
+query-authentication = { git = "https://github.com/securesecrets/query-authentication", tag = "v1.2.0" }
 
 
 

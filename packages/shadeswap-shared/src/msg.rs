@@ -1,41 +1,16 @@
-use fadroma::{
-    scrt::{Binary, Decimal, HumanAddr, Uint128},
-    scrt_callback::Callback,
-    scrt_link::{ContractInstantiationInfo, ContractLink},
-};
+use cosmwasm_math_compat::{Uint128};
+use shade_protocol::{self, utils::asset::Contract};
+use cosmwasm_std::{HumanAddr, Binary};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use crate::TokenType;
-
-pub use crate::snip20_impl::msg as snip20;
+use secret_toolkit::{snip20};
 use crate::token_amount::TokenAmount;
 use crate::token_pair_amount::TokenPairAmount;
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct InitMsg {
-    pub count: i32,
-}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub enum HandleMsg {}
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub enum QueryMsg {
-    // GetCount returns the current count as a json-encoded number
-    GetCount {},
-}
-
-// We define a custom struct for each query response
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
-pub struct CountResponse {
-    pub count: i32,
-}
-
 pub mod router {
 
-    use fadroma::ViewingKey;
+    use query_authentication::viewing_keys::ViewingKey;
 
     use super::*;
 
@@ -50,10 +25,10 @@ pub mod router {
 
     #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
     pub struct InitMsg {
-        pub factory_address: ContractLink<HumanAddr>,
+        pub factory_address: Contract,
         pub prng_seed: Binary,
         pub entropy: Binary,
-        pub viewing_key: Option<ViewingKey>
+        pub viewing_key: Option<String> //Changed from ViewingKey
     }
 
     #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
@@ -90,7 +65,9 @@ pub mod router {
 
 pub mod amm_pair {
     use super::*;
-    use crate::{amm_pair::AMMSettings, fadroma::HumanAddr, Pagination, TokenPair, stake_contract::StakingContractInit};
+    use crate::{amm_pair::AMMSettings, Pagination, TokenPair, stake_contract::StakingContractInit};
+    use cosmwasm_math_compat::Decimal;
+    use fadroma::prelude::{Callback, ContractInstantiationInfo};
     use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
 
@@ -123,7 +100,7 @@ pub mod amm_pair {
     pub struct InitMsg {
         pub pair: TokenPair<HumanAddr>,
         pub lp_token_contract: ContractInstantiationInfo,
-        pub factory_info: ContractLink<HumanAddr>,
+        pub factory_info: Contract,
         pub prng_seed: Binary,
         pub callback: Option<Callback<HumanAddr>>,
         pub entropy: Binary,
@@ -142,7 +119,7 @@ pub mod amm_pair {
             offer: TokenAmount<HumanAddr>,
             expected_return: Option<Uint128>,
             to: Option<HumanAddr>,
-            router_link: Option<ContractLink<HumanAddr>>,
+            router_link: Option<Contract>,
             callback_signature: Option<Binary>
         },
         // SNIP20 receiver interface
@@ -162,7 +139,7 @@ pub mod amm_pair {
         SetAMMPairAdmin {
             admin: HumanAddr
         },
-        SetStakingContract { contract: ContractLink<HumanAddr> },
+        SetStakingContract { contract: Contract },
     }
     #[derive(Serialize, Deserialize, JsonSchema)]
     #[serde(rename_all = "snake_case")]
@@ -170,7 +147,7 @@ pub mod amm_pair {
         SwapTokens {
             expected_return: Option<Uint128>,
             to: Option<HumanAddr>,
-            router_link: Option<ContractLink<HumanAddr>>,
+            router_link: Option<Contract>,
             callback_signature: Option<Binary>
         },
         RemoveLiquidity {
@@ -193,8 +170,8 @@ pub mod amm_pair {
     #[serde(rename_all = "snake_case")]
     pub enum QueryMsgResponse {
         GetPairInfo {
-            liquidity_token: ContractLink<HumanAddr>,
-            factory: ContractLink<HumanAddr>,
+            liquidity_token:Contract,
+            factory: Contract,
             pair: TokenPair<HumanAddr>,
             amount_0: Uint128,
             amount_1: Uint128,
@@ -217,7 +194,7 @@ pub mod amm_pair {
             amount: Uint128,
         },
         StakingContractInfo{
-            staking_contract: ContractLink<HumanAddr>
+            staking_contract: Contract
         },
         EstimatedPrice {
             estimated_price: Uint128
@@ -226,8 +203,9 @@ pub mod amm_pair {
 }
 
 pub mod factory {
-    use crate::{amm_pair::AMMSettings, fadroma::HumanAddr, Pagination, TokenPair};
-    use fadroma::{Binary, ContractInstantiationInfo};
+    use super::*;
+    use crate::{amm_pair::AMMSettings, Pagination, TokenPair};
+    use fadroma::prelude::ContractInstantiationInfo;
     use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
     use crate::amm_pair::{{AMMPair}};
@@ -236,7 +214,7 @@ pub mod factory {
     #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
     pub struct InitMsg {
         pub pair_contract: ContractInstantiationInfo,
-        pub amm_settings: AMMSettings<HumanAddr>,
+        pub amm_settings: AMMSettings,
         pub lp_token_contract: ContractInstantiationInfo,
         pub prng_seed: Binary,
     }
@@ -247,7 +225,7 @@ pub mod factory {
         SetConfig {
             pair_contract: Option<ContractInstantiationInfo>,
             lp_token_contract: Option<ContractInstantiationInfo>,
-            amm_settings: Option<AMMSettings<HumanAddr>>,
+            amm_settings: Option<AMMSettings>,
         },
         CreateAMMPair {
             pair: TokenPair<HumanAddr>,
@@ -274,14 +252,14 @@ pub mod factory {
         },
         GetConfig {
             pair_contract: ContractInstantiationInfo,
-            amm_settings: AMMSettings<HumanAddr>,
+            amm_settings: AMMSettings,
             lp_token_contract: ContractInstantiationInfo,
         },
         GetAMMPairAddress {
             address: HumanAddr,
         },
         GetAMMSettings {
-            settings: AMMSettings<HumanAddr>,
+            settings: AMMSettings,
         },
         GetAdminAddress {
             address: HumanAddr
@@ -309,7 +287,7 @@ pub mod staking {
     pub struct InitMsg {
         pub staking_amount: Uint128,
         pub reward_token: TokenType<HumanAddr>, 
-        pub contract: ContractLink<HumanAddr>
+        pub contract: Contract
     }
 
     #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, JsonSchema)]
