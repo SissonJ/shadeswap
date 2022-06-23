@@ -11,13 +11,15 @@ use crate::token_type::TokenType;
 pub struct TokenPair<A>(pub TokenType<A>, pub TokenType<A>);
 
 impl Canonize for TokenPair<HumanAddr> {
-    fn canonize(&self, api: &impl Api) -> StdResult<TokenPair<CanonicalAddr>> {
+    type Output = TokenPair<CanonicalAddr>;
+    fn canonize(self, api: &impl Api) -> StdResult<TokenPair<CanonicalAddr>> {
         Ok(TokenPair(self.0.canonize(api)?, self.1.canonize(api)?))
     }
 }
 
 impl Humanize for TokenPair<CanonicalAddr> {
-    fn humanize(&self, api: &impl Api) -> StdResult<TokenPair<HumanAddr>> {
+    type Output = TokenPair<HumanAddr>;
+    fn humanize(self, api: &impl Api) -> StdResult<TokenPair<HumanAddr>> {
         Ok(TokenPair(self.0.humanize(api)?, self.1.humanize(api)?))
     }
 }

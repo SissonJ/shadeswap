@@ -15,7 +15,8 @@ pub struct AMMPair<A: Clone> {
 }
 
 impl Canonize for AMMPair<HumanAddr> {
-    fn canonize(&self, api: &impl Api) -> StdResult<AMMPair<CanonicalAddr>> {
+    type Output = AMMPair<CanonicalAddr>;
+    fn canonize(self, api: &impl Api) -> StdResult<AMMPair<CanonicalAddr>> {
         Ok(AMMPair {
             pair: self.pair.canonize(api)?,
             address: self.address.canonize(api)?,
@@ -24,7 +25,8 @@ impl Canonize for AMMPair<HumanAddr> {
 }
 
 impl Humanize for AMMPair<CanonicalAddr> {
-    fn humanize(&self, api: &impl Api) -> StdResult<AMMPair<HumanAddr>> {
+    type Output = AMMPair<HumanAddr>;
+    fn humanize(self, api: &impl Api) -> StdResult<AMMPair<HumanAddr>> {
         Ok(AMMPair {
             pair: self.pair.humanize(api)?,
             address: api.human_address(&self.address)?,

@@ -20,7 +20,8 @@ pub enum TokenType<A> {
     },
 }
 impl Canonize for TokenType<HumanAddr> {
-    fn canonize(&self, api: &impl Api) -> StdResult<TokenType<CanonicalAddr>> {
+    type Output = TokenType<CanonicalAddr>;
+    fn canonize(self, api: &impl Api) -> StdResult<TokenType<CanonicalAddr>> {
         Ok(match self {
             Self::CustomToken {
                 contract_addr,
@@ -36,7 +37,8 @@ impl Canonize for TokenType<HumanAddr> {
     }
 }
 impl Humanize for TokenType<CanonicalAddr> {
-    fn humanize(&self, api: &impl Api) -> StdResult<TokenType<HumanAddr>> {
+    type Output = TokenType<HumanAddr>;
+    fn humanize(self, api: &impl Api) -> StdResult<TokenType<HumanAddr>> {
         Ok(match self {
             Self::CustomToken {
                 contract_addr,
